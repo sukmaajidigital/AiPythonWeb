@@ -49,7 +49,7 @@ def process_query(query):
 def text_to_speech(text, language="id"):
     try:
         tts = gTTS(text=text, lang=language, slow=False)
-        output_path = f"static/response_{datetime.now().strftime('%Y%m%d%H%M%S')}.mp3"
+        output_path = f"static/audio_response/response_{datetime.now().strftime('%Y%m%d%H%M%S')}.mp3"
         tts.save(output_path)
         return output_path
     except Exception as e:
@@ -84,8 +84,8 @@ def save_response_to_file(response):
 # Speak
 def speak(text):
     tts = gTTS(text=text, lang="id", slow=False)
-    tts.save("static/response.mp3")
-    os.system("start static/response.mp3")
+    tts.save("static/audio_response/response.mp3")
+    os.system("start static/audio_response/response.mp3")
 
 @app.route("/")
 def index():
@@ -96,7 +96,7 @@ def speech_to_text():
     if "audio" not in request.files:
         return jsonify({"error": "Tidak ada file audio yang dikirim."}), 400
     audio_file = request.files["audio"]
-    file_path = f"uploads/{audio_file.filename}"
+    file_path = f"static/audio/{audio_file.filename}"
     audio_file.save(file_path)
 
     # Recognize speech
@@ -132,7 +132,7 @@ def tts():
 
 @app.route("/get-audio/<filename>", methods=["GET"])
 def get_audio(filename):
-    return send_file(f"static/{filename}", mimetype="audio/mp3")
+    return send_file(f"static/audio_response/{filename}", mimetype="audio/mp3")
 
 @app.route("/open-application", methods=["POST"])
 def open_app():
