@@ -46,7 +46,7 @@ def process_query(query):
 def text_to_speech(text, language="id"):
     try:
         tts = gTTS(text=text, lang=language, slow=False)
-        output_path = "static/response.mp3"
+        output_path = f"static/response_{datetime.now().strftime('%Y%m%d%H%M%S')}.mp3"
         tts.save(output_path)
         return output_path
     except Exception as e:

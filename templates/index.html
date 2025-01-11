@@ -104,6 +104,12 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;
       };
 
+      const playAudio = (audioPath) => {
+        responseAudio.src = audioPath;
+        responseAudio.hidden = false;
+        responseAudio.play();
+      };
+
       document.getElementById("sendQuery").addEventListener("click", async () => {
         const query = queryInput.value;
         if (!query) {
@@ -124,9 +130,7 @@
         appendMessage(data.response, "bot");
 
         if (data.audio_path) {
-          responseAudio.src = `/get-audio/${data.audio_path.split("/").pop()}`;
-          responseAudio.hidden = false;
-          responseAudio.play();
+          playAudio(`/get-audio/${data.audio_path.split("/").pop()}`);
         }
       });
 
@@ -151,9 +155,7 @@
           appendMessage(data.response, "bot");
 
           if (data.audio_path) {
-            responseAudio.src = `/get-audio/${data.audio_path.split("/").pop()}`;
-            responseAudio.hidden = false;
-            responseAudio.play();
+            playAudio(`/get-audio/${data.audio_path.split("/").pop()}`);
           }
         };
 
