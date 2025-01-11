@@ -76,7 +76,8 @@ def query():
         return jsonify({"error": "Query kosong."}), 400
 
     response_text = process_query(query_text)
-    return jsonify({"response": response_text})
+    audio_path = text_to_speech(response_text)
+    return jsonify({"response": response_text, "audio_path": audio_path})
 
 @app.route("/text-to-speech", methods=["POST"])
 def tts():
@@ -87,6 +88,11 @@ def tts():
 
     audio_path = text_to_speech(text)
     return jsonify({"audio_path": audio_path})
+
+@app.route("/get-audio/<filename>", methods=["GET"])
+def get_audio(filename):
+    return send_file(f"static/{filename}", mimetype="audio/mp3")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
