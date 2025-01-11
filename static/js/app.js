@@ -4,8 +4,28 @@ const responseAudio = document.getElementById("responseAudio");
 
 const appendMessage = (message, type) => {
   const div = document.createElement("div");
-  div.className = `chat-message ${type}-message`;
-  div.innerText = message;
+  const now = new Date();
+  const formattedDate = now.toLocaleString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  div.className = `chat-message ${type}-message d-flex flex-column`;
+
+  const chatBubble = document.createElement("div");
+  chatBubble.className = "chat-bubble";
+  chatBubble.innerText = message;
+
+  const chatMeta = document.createElement("div");
+  chatMeta.className = "chat-meta";
+  chatMeta.innerText = type === "user" ? `You • ${formattedDate}` : `Bot • ${formattedDate}`;
+
+  div.appendChild(chatBubble);
+  div.appendChild(chatMeta);
+
   chatContainer.appendChild(div);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 };
