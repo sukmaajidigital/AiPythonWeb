@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Suara</title>
+  </head>
+  <body>
+    <h1>AI Suara</h1>
+    <form id="uploadForm">
+      <input type="file" id="audioFile" accept="audio/*" required />
+      <button type="submit">Kirim</button>
+    </form>
+    <p id="response"></p>
+
+    <script>
+      document.getElementById("uploadForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const formData = new FormData();
+        const audioFile = document.getElementById("audioFile").files[0];
+        formData.append("audio", audioFile);
+
+        const response = await fetch("/speech-to-text", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json();
+        document.getElementById("response").innerText = result.text;
+      });
+    </script>
+  </body>
+</html>
