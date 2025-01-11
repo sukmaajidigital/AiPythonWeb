@@ -107,6 +107,7 @@
       const playAudio = (audioPath) => {
         responseAudio.src = audioPath;
         responseAudio.hidden = false;
+        responseAudio.load(); // Memastikan audio dimuat ulang
         responseAudio.play();
       };
 
@@ -120,12 +121,16 @@
         appendMessage(query, "user");
         queryInput.value = "";
 
-        const response = await fetch("/process-query", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query }),
-        });
-
+        if (query.includes("buka")) {
+          const app_name = query.replace("buka", "").trim();
+          open_application(app_name);
+        } else {
+          const response = await fetch("/process-query", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query }),
+          });
+        }
         const data = await response.json();
         appendMessage(data.response, "bot");
 
@@ -145,17 +150,22 @@
           appendMessage(speechResult, "user");
           queryInput.value = speechResult;
 
-          const response = await fetch("/process-query", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: speechResult }),
-          });
+          if (speechResult.includes("buka")) {
+            const app_name = speechResult.replace("buka", "").trim();
+            open_application(app_name);
+          } else {
+            const response = await fetch("/process-query", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ query: speechResult }),
+            });
 
-          const data = await response.json();
-          appendMessage(data.response, "bot");
+            const data = await response.json();
+            appendMessage(data.response, "bot");
 
-          if (data.audio_path) {
-            playAudio(`/get-audio/${data.audio_path.split("/").pop()}`);
+            if (data.audio_path) {
+              playAudio(`/get-audio/${data.audio_path.split("/").pop()}`);
+            }
           }
         };
 
@@ -165,6 +175,18 @@
 
         recognition.start();
       });
+
+      const open_application = (app_name) => {
+        fetch("/open-application", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ app_name }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            appendMessage(data.response, "bot");
+          });
+      };
     </script>
   </body>
 </html>

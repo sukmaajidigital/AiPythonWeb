@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from gtts import gTTS
 import speech_recognition as sr
 from datetime import datetime
+import subprocess
+from pathapp import APLIKASI  # Impor dictionary aplikasi dari pathapp.py
 
 # Load environment variables
 load_dotenv()
@@ -20,14 +22,15 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 
 # Recognize Speech
-def recognize_speech(file_path):
+def recognize_speech():
     recognizer = sr.Recognizer()
-    with sr.AudioFile(file_path) as source:
-        audio = recognizer.record(source)
+    with sr.Microphone() as source:
+        print("Mendengarkan...")
+        audio = recognizer.listen(source)
         try:
             return recognizer.recognize_google(audio, language="id-ID")
         except sr.UnknownValueError:
-            return "Maaf, aku tidak mengerti apa yang Anda ucapkan."
+            return None
         except sr.RequestError as e:
             return f"Kesalahan layanan Speech-to-Text: {e}"
 
@@ -51,6 +54,38 @@ def text_to_speech(text, language="id"):
         return output_path
     except Exception as e:
         return f"Kesalahan Text-to-Speech: {e}"
+
+# Open Application
+def open_application(app_name):
+    app_path = APLIKASI.get(app_name)
+    if app_path:
+        try:
+            subprocess.Popen([app_path], shell=True)  # Menggunakan Popen agar tidak menunggu aplikasi ditutup
+            response = f"Membuka {app_name}"
+            print(response)
+            save_response_to_file(response)  # Simpan respons ke file
+            return response
+        except Exception as e:
+            error_response = f"Kesalahan saat membuka {app_name}: {e}"
+            print(error_response)
+            save_response_to_file(error_response)  # Simpan pesan kesalahan ke file
+            return error_response
+    else:
+        not_found_response = f"Aplikasi {app_name} tidak tersedia."
+        print(not_found_response)
+        save_response_to_file(not_found_response)  # Simpan pesan aplikasi tidak ditemukan ke file
+        return not_found_response
+
+# Save Response to File
+def save_response_to_file(response):
+    with open("responses.txt", "a") as file:
+        file.write(response + "\n")
+
+# Speak
+def speak(text):
+    tts = gTTS(text=text, lang="id", slow=False)
+    tts.save("static/response.mp3")
+    os.system("start static/response.mp3")
 
 @app.route("/")
 def index():
@@ -93,6 +128,15 @@ def tts():
 def get_audio(filename):
     return send_file(f"static/{filename}", mimetype="audio/mp3")
 
+@app.route("/open-application", methods=["POST"])
+def open_app():
+    data = request.get_json()
+    app_name = data.get("app_name", "")
+    if not app_name:
+        return jsonify({"error": "Nama aplikasi kosong."}), 400
+
+    response = open_application(app_name)
+    return jsonify({"response": response})
 
 if __name__ == "__main__":
     app.run(debug=True)

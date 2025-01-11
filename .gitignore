@@ -3,3 +3,5 @@
 env
 /static
 /uploads
+/__pycache__
+responses.txt
