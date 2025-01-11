@@ -1,32 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Suara</title>
+    <title>Aplikasi AI Suara</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f9f9f9;
+      }
+
+      .container {
+        text-align: center;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      textarea,
+      input[type="file"] {
+        width: 100%;
+        margin: 10px 0;
+      }
+    </style>
   </head>
   <body>
-    <h1>AI Suara</h1>
-    <form id="uploadForm">
-      <input type="file" id="audioFile" accept="audio/*" required />
-      <button type="submit">Kirim</button>
-    </form>
-    <p id="response"></p>
-
-    <script>
-      document.getElementById("uploadForm").addEventListener("submit", async function (event) {
-        event.preventDefault();
-        const formData = new FormData();
-        const audioFile = document.getElementById("audioFile").files[0];
-        formData.append("audio", audioFile);
-
-        const response = await fetch("/speech-to-text", {
-          method: "POST",
-          body: formData,
-        });
-        const result = await response.json();
-        document.getElementById("response").innerText = result.text;
-      });
-    </script>
+    <div class="container">
+      <h1>Aplikasi AI Suara</h1>
+      <input type="file" id="audioInput" accept="audio/*" />
+      <button id="uploadAudio">Unggah dan Proses</button>
+      <textarea id="queryInput" placeholder="Ketik pertanyaan Anda di sini..."></textarea>
+      <button id="sendQuery">Kirim Pertanyaan</button>
+      <div id="responseContainer"></div>
+    </div>
+    <script src="/static/js/app.js"></script>
   </body>
+  <script>
+    document.getElementById("uploadAudio").addEventListener("click", async () => {
+      const fileInput = document.getElementById("audioInput");
+      if (!fileInput.files[0]) {
+        alert("Pilih file audio terlebih dahulu!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("audio", fileInput.files[0]);
+
+      const response = await fetch("/speech-to-text", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      document.getElementById("responseContainer").innerText = `Transkripsi: ${data.text}`;
+    });
+
+    document.getElementById("sendQuery").addEventListener("click", async () => {
+      const query = document.getElementById("queryInput").value;
+      const response = await fetch("/process-query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+
+      const data = await response.json();
+      document.getElementById("responseContainer").innerText = `Jawaban: ${data.response}`;
+    });
+  </script>
 </html>
