@@ -110,9 +110,15 @@ def query():
     if not query_text:
         return jsonify({"error": "Query kosong."}), 400
 
-    response_text = process_query(query_text)
-    audio_path = text_to_speech(response_text)
-    return jsonify({"response": response_text, "audio_path": audio_path})
+    if query_text.lower().startswith("buka"):
+        app_name = query_text.replace("buka", "").strip()
+        response_text = open_application(app_name)
+        audio_path = text_to_speech(response_text)
+        return jsonify({"response": response_text, "audio_path": audio_path})
+    else:
+        response_text = process_query(query_text)
+        audio_path = text_to_speech(response_text)
+        return jsonify({"response": response_text, "audio_path": audio_path})
 
 @app.route("/text-to-speech", methods=["POST"])
 def tts():

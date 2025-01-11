@@ -130,12 +130,13 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ query }),
           });
-        }
-        const data = await response.json();
-        appendMessage(data.response, "bot");
 
-        if (data.audio_path) {
-          playAudio(`/get-audio/${data.audio_path.split("/").pop()}`);
+          const data = await response.json();
+          appendMessage(data.response, "bot");
+
+          if (data.audio_path) {
+            playAudio(`/get-audio/${data.audio_path.split("/").pop()}`);
+          }
         }
       });
 
@@ -185,6 +186,9 @@
           .then((response) => response.json())
           .then((data) => {
             appendMessage(data.response, "bot");
+            if (data.audio_path) {
+              playAudio(`/get-audio/${data.audio_path.split("/").pop()}`);
+            }
           });
       };
     </script>
